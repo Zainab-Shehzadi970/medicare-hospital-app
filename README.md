@@ -1,97 +1,57 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# Medicare Hospital: Patient Appointment App
 
-# Getting Started
+Android app (React Native) that lets patients book doctor appointments online. Bookings are stored in Supabase and appear on the doctor's web dashboard in real time.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+## Features
+- Patient sign up and login (email format validation)
+- Single-screen booking form: Department > Doctor > Date > Time > Reason
+- Doctors and departments are loaded from the database
+- Date options show only the days the selected doctor is available
+- Time slots are generated from the doctor's schedule
+- Already booked slots are disabled for other patients
+- Double booking is prevented at database level (unique index)
+- Each patient can only access their own records (Row Level Security)
 
-## Step 1: Start Metro
+## Tech Stack
+- React Native 0.87 (CLI, not Expo), Android
+- Supabase: Auth, PostgreSQL, Row Level Security, Realtime
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+## Related Repository
+Doctor dashboard (Next.js web app): add link to the `medicare-web` repo here.
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+## Getting Started
 
-```sh
-# Using npm
-npm start
+### Prerequisites
+- Node.js 22 or newer
+- JDK 17
+- Android Studio with Android SDK, and `ANDROID_HOME` set
+- An Android phone with USB debugging on (or an emulator)
 
-# OR using Yarn
-yarn start
+### Setup
+1. Clone the repo and install packages:
+```bash
+   npm install
+```
+2. Open `src/lib/supabase.js` and set your Supabase project URL and **publishable (anon) key**:
+```js
+   const SUPABASE_URL = 'https://YOUR-PROJECT.supabase.co';
+   const SUPABASE_ANON_KEY = 'YOUR-PUBLISHABLE-KEY';
+```
+   Never put the `service_role` / secret key in the app.
+
+### Run
+```bash
+adb reverse tcp:8081 tcp:8081
+npx react-native start
+```
+In a second terminal:
+```bash
+npx react-native run-android
 ```
 
-## Step 2: Build and run your app
+## Database
+Supabase tables: `profiles`, `departments`, `doctors`, `doctor_schedules`, `appointments`, plus a `get_booked_slots` function. Row Level Security is enabled on all tables.
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
-
-### Android
-
-```sh
-# Using npm
-npm run android
-
-# OR using Yarn
-yarn android
-```
-
-### iOS
-
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
-```
-
-Then, and every time you update your native dependencies, run:
-
-```sh
-bundle exec pod install
-```
-
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
-
-```sh
-# Using npm
-npm run ios
-
-# OR using Yarn
-yarn ios
-```
-
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
-
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
-
-## Step 3: Modify your app
-
-Now that you have successfully run the app, let's make changes!
-
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
-
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
-
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
-
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+## Status
+Completed: authentication, appointment booking, real-time sync with the doctor dashboard.
+Planned: "My Appointments" screen (view and cancel bookings).
