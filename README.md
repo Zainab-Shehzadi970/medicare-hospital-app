@@ -17,7 +17,18 @@ Android app (React Native) that lets patients book doctor appointments online. B
 - Supabase: Auth, PostgreSQL, Row Level Security, Realtime
 
 ## Related Repository
-Doctor dashboard (Next.js web app): add link to the `medicare-web` repo here.
+Doctor dashboard (Next.js web app): https://github.com/Zainab-Shehzadi970/medicare-web
+
+## Project Structure
+```
+App.tsx                  Session check: shows login or booking screen
+src/
+  lib/supabase.js        Supabase client
+  screens/
+    AuthScreen.js        Login and signup
+    HomeScreen.js        Booking form (department, doctor, date, time, reason)
+  theme.js               Shared colors
+```
 
 ## Getting Started
 
@@ -40,17 +51,25 @@ Doctor dashboard (Next.js web app): add link to the `medicare-web` repo here.
    Never put the `service_role` / secret key in the app.
 
 ### Run
+1. Start Metro:
 ```bash
-adb reverse tcp:8081 tcp:8081
-npx react-native start
+   adb reverse tcp:8081 tcp:8081
+   npx react-native start
 ```
-In a second terminal:
+2. In a second terminal, build and install the app (first time, or after adding a native package):
 ```bash
-npx react-native run-android
+   npx react-native run-android --active-arch-only
 ```
 
+### Release APK
+```bash
+cd android
+gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a
+```
+The APK is created at `android/app/build/outputs/apk/release/app-release.apk` and runs without Metro or a laptop.
+
 ## Database
-Supabase tables: `profiles`, `departments`, `doctors`, `doctor_schedules`, `appointments`, plus a `get_booked_slots` function. Row Level Security is enabled on all tables.
+Supabase tables: `profiles`, `departments`, `doctors`, `doctor_schedules`, `appointments`, plus a `get_booked_slots` function. Row Level Security is enabled on all tables. Doctor accounts are created in Supabase Auth and linked to a row in the `doctors` table. The same database is used by the doctor dashboard.
 
 ## Status
 Completed: authentication, appointment booking, real-time sync with the doctor dashboard.
