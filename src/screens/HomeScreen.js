@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, TextInput,
+  KeyboardAvoidingView, Platform,
 } from 'react-native';
 import { supabase } from '../lib/supabase';
 import { colors } from '../theme';
@@ -48,6 +49,7 @@ function Chip({ label, selected, onPress, sub, disabled }) {
 }
 
 export default function HomeScreen({ session }) {
+  const scrollRef = useRef(null);
   const user = session?.user;
   const userName = user?.user_metadata?.full_name;
 
@@ -216,116 +218,130 @@ export default function HomeScreen({ session }) {
     setDate(null);
     setTime(null);
     setReason('');
+    setTimeout(() => scrollRef.current?.scrollTo({ y: 0, animated: true }), 100);
   };
 
   return (
-    <View style={s.container}>
-      <View style={s.header}>
-        <View>
-          <Text style={s.hello}>Hello, {userName || 'there'}</Text>
-          <Text style={s.headerSub}>Medicare Hospital</Text>
-        </View>
-        <TouchableOpacity style={s.logoutBtn} onPress={() => supabase.auth.signOut()}>
-          <Text style={s.logoutText}>Log out</Text>
-        </TouchableOpacity>
-      </View>
-
-      {dataLoading ? (
-        <View style={s.center}>
-          <ActivityIndicator size="large" color={colors.primary} />
-        </View>
-      ) : loadError ? (
-        <View style={s.center}>
-          <Text style={s.error}>{loadError}</Text>
-          <TouchableOpacity style={[s.button, { paddingHorizontal: 30 }]} onPress={loadData}>
-            <Text style={s.buttonText}>Retry</Text>
-          </TouchableOpacity>
-        </View>
-      ) : (
-        <ScrollView contentContainerStyle={s.body} keyboardShouldPersistTaps="handled">
-          <Text style={s.title}>Book an Appointment</Text>
-          {success ? <Text style={s.success}>{success}</Text> : null}
-
-          <Text style={s.label}>1. Department</Text>
-          <View style={s.wrap}>
-            {departments.map((d) => (
-              <Chip key={d.id} label={d.name} selected={deptId === d.id} onPress={() => pickDept(d.id)} />
-            ))}
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <View style={s.container}>
+        <View style={s.header}>
+          <View>
+            <Text style={s.hello}>Hello, {userName || 'there'}</Text>
+            <Text style={s.headerSub}>Medicare Hospital</Text>
           </View>
-
-          <Text style={s.label}>2. Doctor</Text>
-          {!deptId ? (
-            <Text style={s.hint}>Select a department first.</Text>
-          ) : doctors.length === 0 ? (
-            <Text style={s.hint}>No doctors available in this department yet.</Text>
-          ) : (
-            <View style={s.wrap}>
-              {doctors.map((d) => (
-                <Chip
-                  key={d.id}
-                  label={d.name}
-                  sub={[d.specialization, d.consultation_fee ? `Rs. ${d.consultation_fee}` : null]
-                    .filter(Boolean)
-                    .join(' • ')}
-                  selected={doctorId === d.id}
-                  onPress={() => pickDoctor(d.id)}
-                />
-              ))}
-            </View>
-          )}
-
-          <Text style={s.label}>3. Date</Text>
-          {!doctorId ? (
-            <Text style={s.hint}>Select a doctor first.</Text>
-          ) : days.length === 0 ? (
-            <Text style={s.hint}>This doctor has no schedule in the next {DAYS_AHEAD} days.</Text>
-          ) : (
-            <View style={s.wrap}>
-              {days.map((d) => (
-                <Chip key={d.iso} label={d.label} sub={d.day} selected={date === d.iso} onPress={() => pickDate(d.iso)} />
-              ))}
-            </View>
-          )}
-
-          <Text style={s.label}>4. Time</Text>
-          {!date ? (
-            <Text style={s.hint}>Select a date first.</Text>
-          ) : slots.length === 0 ? (
-            <Text style={s.hint}>No slots available on this day.</Text>
-          ) : (
-            <View style={s.wrap}>
-              {slots.map((t) => (
-                <Chip
-                  key={t}
-                  label={fmt12(t)}
-                  selected={time === t}
-                  disabled={booked.includes(t)}
-                  onPress={() => setTime(t)}
-                />
-              ))}
-            </View>
-          )}
-
-          <Text style={s.label}>5. Reason for visit</Text>
-          <TextInput
-            style={[s.input, { height: 80, textAlignVertical: 'top' }]}
-            placeholder="Reason for visit (optional)"
-            placeholderTextColor="#9CA3AF"
-            multiline
-            value={reason}
-            onChangeText={setReason}
-          />
-
-          {error ? <Text style={s.error}>{error}</Text> : null}
-
-          <TouchableOpacity style={s.button} onPress={handleBook} disabled={loading} activeOpacity={0.85}>
-            {loading
-              ? <ActivityIndicator color={colors.white} />
-              : <Text style={s.buttonText}>Book Appointment</Text>}
+          <TouchableOpacity style={s.logoutBtn} onPress={() => supabase.auth.signOut()}>
+            <Text style={s.logoutText}>Log out</Text>
           </TouchableOpacity>
-        </ScrollView>
-      )}
-    </View>
+        </View>
+
+        {dataLoading ? (
+          <View style={s.center}>
+            <ActivityIndicator size="large" color={colors.primary} />
+          </View>
+        ) : loadError ? (
+          <View style={s.center}>
+            <Text style={s.error}>{loadError}</Text>
+            <TouchableOpacity style={[s.button, { paddingHorizontal: 30 }]} onPress={loadData}>
+              <Text style={s.buttonText}>Retry</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <ScrollView
+            ref={scrollRef}
+            contentContainerStyle={[s.body, { paddingBottom: 250 }]}
+            keyboardShouldPersistTaps="handled"
+            keyboardDismissMode="on-drag"
+          >
+            <Text style={s.title}>Book an Appointment</Text>
+            {success ? <Text style={s.success}>{success}</Text> : null}
+
+            <Text style={s.label}>1. Department</Text>
+            <View style={s.wrap}>
+              {departments.map((d) => (
+                <Chip key={d.id} label={d.name} selected={deptId === d.id} onPress={() => pickDept(d.id)} />
+              ))}
+            </View>
+
+            <Text style={s.label}>2. Doctor</Text>
+            {!deptId ? (
+              <Text style={s.hint}>Select a department first.</Text>
+            ) : doctors.length === 0 ? (
+              <Text style={s.hint}>No doctors available in this department yet.</Text>
+            ) : (
+              <View style={s.wrap}>
+                {doctors.map((d) => (
+                  <Chip
+                    key={d.id}
+                    label={d.name}
+                    sub={[d.specialization, d.consultation_fee ? `Rs. ${d.consultation_fee}` : null]
+                      .filter(Boolean)
+                      .join(' • ')}
+                    selected={doctorId === d.id}
+                    onPress={() => pickDoctor(d.id)}
+                  />
+                ))}
+              </View>
+            )}
+
+            <Text style={s.label}>3. Date</Text>
+            {!doctorId ? (
+              <Text style={s.hint}>Select a doctor first.</Text>
+            ) : days.length === 0 ? (
+              <Text style={s.hint}>This doctor has no schedule in the next {DAYS_AHEAD} days.</Text>
+            ) : (
+              <View style={s.wrap}>
+                {days.map((d) => (
+                  <Chip key={d.iso} label={d.label} sub={d.day} selected={date === d.iso} onPress={() => pickDate(d.iso)} />
+                ))}
+              </View>
+            )}
+
+            <Text style={s.label}>4. Time</Text>
+            {!date ? (
+              <Text style={s.hint}>Select a date first.</Text>
+            ) : slots.length === 0 ? (
+              <Text style={s.hint}>No slots available on this day.</Text>
+            ) : (
+              <View style={s.wrap}>
+                {slots.map((t) => (
+                  <Chip
+                    key={t}
+                    label={fmt12(t)}
+                    selected={time === t}
+                    disabled={booked.includes(t)}
+                    onPress={() => setTime(t)}
+                  />
+                ))}
+              </View>
+            )}
+
+            <Text style={s.label}>5. Reason for visit</Text>
+            <TextInput
+              style={[s.input, { height: 80, textAlignVertical: 'top' }]}
+              placeholder="Reason for visit (optional)"
+              placeholderTextColor="#9CA3AF"
+              multiline
+              value={reason}
+              onChangeText={setReason}
+              onFocus={() =>
+                setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 300)
+              }
+            />
+
+            {error ? <Text style={s.error}>{error}</Text> : null}
+
+            <TouchableOpacity style={s.button} onPress={handleBook} disabled={loading} activeOpacity={0.85}>
+              {loading
+                ? <ActivityIndicator color={colors.white} />
+                : <Text style={s.buttonText}>Book Appointment</Text>}
+            </TouchableOpacity>
+          </ScrollView>
+        )}
+      </View>
+    </KeyboardAvoidingView>
   );
 }
 

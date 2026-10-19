@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-  View, Text, TextInput, TouchableOpacity, ActivityIndicator,
+  View, Text, TextInput, TouchableOpacity, ActivityIndicator, Image,
   StyleSheet, ScrollView, KeyboardAvoidingView, Platform,
 } from 'react-native';
 import { supabase } from '../lib/supabase';
@@ -68,30 +68,42 @@ export default function AuthScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={{ flex: 1, backgroundColor: colors.white }}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <ScrollView contentContainerStyle={s.container} keyboardShouldPersistTaps="handled">
+      <ScrollView
+        contentContainerStyle={[s.container, { paddingBottom: 200 }]}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+      >
+        {/* Brand */}
         <View style={s.brandRow}>
-          <View style={s.logoBadge}>
-            <Text style={s.logoLetter}>M</Text>
-          </View>
+          <Image source={require('../assets/logo.png')} style={s.logo} resizeMode="contain" />
           <View>
             <Text style={s.brand}>MEDICARE</Text>
-            <Text style={s.brandSub}>H O S P I T A L</Text>
+            <Text style={s.brandSub}>HOSPITAL</Text>
           </View>
         </View>
 
-        <Text style={s.title}>{isSignup ? 'Create your account' : 'Welcome back'}</Text>
+        {/* Badge */}
+        <View style={s.badge}>
+          <View style={s.badgeDot} />
+          <Text style={s.badgeText}>PATIENT PORTAL</Text>
+        </View>
+
+        <Text style={s.title}>
+          {isSignup ? 'Create your ' : 'Welcome '}
+          <Text style={s.titleRed}>{isSignup ? 'account.' : 'back.'}</Text>
+        </Text>
         <Text style={s.subtitle}>
           {isSignup
-            ? 'Sign up to book your appointments online.'
+            ? 'Sign up to book your appointments online with our top specialists.'
             : 'Log in to book and manage your appointments.'}
         </Text>
 
         {isSignup && (
           <>
-            <Text style={s.label}>Full name</Text>
+            <Text style={s.label}>FULL NAME</Text>
             <TextInput
               style={s.input}
               placeholder="e.g. Ahmed Khan"
@@ -99,7 +111,7 @@ export default function AuthScreen() {
               value={fullName}
               onChangeText={setFullName}
             />
-            <Text style={s.label}>Phone number</Text>
+            <Text style={s.label}>PHONE NUMBER</Text>
             <TextInput
               style={s.input}
               placeholder="e.g. 03001234567"
@@ -111,7 +123,7 @@ export default function AuthScreen() {
           </>
         )}
 
-        <Text style={s.label}>Email</Text>
+        <Text style={s.label}>EMAIL</Text>
         <TextInput
           style={s.input}
           placeholder="name@example.com"
@@ -122,10 +134,10 @@ export default function AuthScreen() {
           onChangeText={setEmail}
         />
 
-        <Text style={s.label}>Password</Text>
-        <View style={s.passwordRow}>
+        <Text style={s.label}>PASSWORD</Text>
+        <View style={s.passwordWrap}>
           <TextInput
-            style={[s.input, { flex: 1, marginBottom: 0 }]}
+            style={s.passwordInput}
             placeholder="At least 6 characters"
             placeholderTextColor="#9CA3AF"
             secureTextEntry={!showPassword}
@@ -169,38 +181,48 @@ const s = StyleSheet.create({
     flexGrow: 1,
     backgroundColor: colors.white,
     paddingHorizontal: 24,
-    paddingTop: 60,
-    paddingBottom: 40,
+    paddingTop: 56,
   },
-  brandRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 32 },
-  logoBadge: {
-    width: 48, height: 48, borderRadius: 12, backgroundColor: colors.primary,
-    alignItems: 'center', justifyContent: 'center', marginRight: 12,
+  brandRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 28 },
+  logo: { width: 52, height: 52, marginRight: 10 },
+  brand: { fontSize: 26, fontWeight: '900', color: '#000000', letterSpacing: -0.5 },
+  brandSub: { fontSize: 12, fontWeight: '700', color: '#4B5563', letterSpacing: 3, marginTop: 1 },
+  badge: {
+    alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center',
+    backgroundColor: colors.redLight, borderWidth: 1, borderColor: '#F5B5B3',
+    paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, marginBottom: 14,
   },
-  logoLetter: { color: colors.white, fontSize: 24, fontWeight: '800' },
-  brand: { fontSize: 20, fontWeight: '800', color: colors.black, letterSpacing: 1 },
-  brandSub: { fontSize: 10, color: colors.primary, fontWeight: '600', marginTop: 2 },
-  title: { fontSize: 26, fontWeight: '700', color: colors.black, marginBottom: 6 },
-  subtitle: { fontSize: 14, color: colors.muted, marginBottom: 24 },
-  label: { fontSize: 14, fontWeight: '600', color: colors.text, marginBottom: 6 },
+  badgeDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: colors.primary, marginRight: 8 },
+  badgeText: { fontSize: 11, fontWeight: '800', color: colors.primary, letterSpacing: 1 },
+  title: { fontSize: 26, fontWeight: '800', color: '#111827', lineHeight: 32, marginBottom: 8 },
+  titleRed: { color: colors.primary },
+  subtitle: { fontSize: 14, color: '#6B7280', lineHeight: 20, marginBottom: 26 },
+  label: { fontSize: 11, fontWeight: '800', color: '#4B5563', letterSpacing: 0.8, marginBottom: 6 },
   input: {
-    borderWidth: 1, borderColor: colors.border, borderRadius: 10,
-    paddingHorizontal: 14, paddingVertical: 12, fontSize: 15,
-    color: colors.text, backgroundColor: colors.white, marginBottom: 16,
+    borderWidth: 1, borderColor: colors.border, borderRadius: 12,
+    paddingHorizontal: 14, paddingVertical: 13, fontSize: 15,
+    color: colors.text, backgroundColor: '#F9FAFB', marginBottom: 16,
   },
-  passwordRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 16 },
-  showBtn: { paddingHorizontal: 12, paddingVertical: 12 },
-  showText: { color: colors.primary, fontWeight: '600', fontSize: 14 },
+  passwordWrap: {
+    flexDirection: 'row', alignItems: 'center',
+    borderWidth: 1, borderColor: colors.border, borderRadius: 12,
+    backgroundColor: '#F9FAFB', marginBottom: 16,
+  },
+  passwordInput: { flex: 1, paddingHorizontal: 14, paddingVertical: 13, fontSize: 15, color: colors.text },
+  showBtn: { paddingHorizontal: 14, paddingVertical: 13 },
+  showText: { color: colors.primary, fontWeight: '700', fontSize: 13 },
   error: {
     color: colors.primaryDark, backgroundColor: colors.redLight,
-    padding: 10, borderRadius: 8, marginBottom: 12, fontSize: 13,
+    padding: 10, borderRadius: 10, marginBottom: 12, fontSize: 13,
   },
   info: { color: colors.success, marginBottom: 12, fontSize: 13 },
   button: {
-    backgroundColor: colors.primary, paddingVertical: 14, borderRadius: 10,
+    backgroundColor: colors.primary, paddingVertical: 15, borderRadius: 12,
     alignItems: 'center', marginTop: 4,
+    shadowColor: colors.primary, shadowOpacity: 0.35, shadowRadius: 12,
+    shadowOffset: { width: 0, height: 6 }, elevation: 6,
   },
-  buttonText: { color: colors.white, fontSize: 16, fontWeight: '700' },
-  switchText: { textAlign: 'center', marginTop: 20, color: colors.muted, fontSize: 14 },
-  switchLink: { color: colors.primary, fontWeight: '700' },
+  buttonText: { color: colors.white, fontSize: 16, fontWeight: '800' },
+  switchText: { textAlign: 'center', marginTop: 22, color: '#6B7280', fontSize: 14 },
+  switchLink: { color: colors.primary, fontWeight: '800' },
 });
