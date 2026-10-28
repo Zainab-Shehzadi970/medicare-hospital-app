@@ -4,7 +4,7 @@ import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { supabase } from './src/lib/supabase';
 import { colors } from './src/theme';
 import AuthScreen from './src/screens/AuthScreen';
-import HomeScreen from './src/screens/HomeScreen';
+import MainTabs from './src/screens/MainTabs';
 
 export default function App() {
   const [session, setSession] = useState<any>(null);
@@ -26,8 +26,8 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <StatusBar barStyle="dark-content" />
-      <SafeAreaView style={{ flex: 1, backgroundColor: colors.white }}>
-        {session ? <HomeScreen session={session} /> : <AuthScreen />}
+      <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
+        {session ? <MainTabs session={session} /> : <AuthScreen />}
       </SafeAreaView>
     </SafeAreaProvider>
   );
